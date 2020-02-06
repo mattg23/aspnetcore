@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <Sdk Name="Yarn.MSBuild" />
 
@@ -21,7 +21,11 @@
     <YarnInputs Include="$(YarnWorkingDir)**" Exclude="$(YarnWorkingDir)node_modules\**;$(YarnWorkingDir)*.d.ts" />
     <YarnOutputs Include="wwwroot\AuthenticationService.js" />
     <YarnOutputs Include="wwwroot\AuthenticationService.js.map" />
-    <None Include="@(YarnInputs)" />
+    <None Include="C:\work\AspNetCore2\src\Components\Blazor\WebAssembly.Authentication\src\Interop\AuthenticationService.ts" />
+    <None Include="C:\work\AspNetCore2\src\Components\Blazor\WebAssembly.Authentication\src\Interop\package.json" />
+    <None Include="C:\work\AspNetCore2\src\Components\Blazor\WebAssembly.Authentication\src\Interop\tsconfig.json" />
+    <None Include="C:\work\AspNetCore2\src\Components\Blazor\WebAssembly.Authentication\src\Interop\webpack.config.js" />
+    <None Include="C:\work\AspNetCore2\src\Components\Blazor\WebAssembly.Authentication\src\Interop\yarn.lock" />
     <None Include="wwwroot\.gitignore" />
   </ItemGroup>
   
@@ -33,10 +37,11 @@
     <Reference Include="Microsoft.Extensions.Configuration" />
   </ItemGroup>
 
-  <Target Name="CompileInterop"
-          Condition="'$(DesignTimeBuild)' != 'true'"
-          Inputs="@(YarnInputs)"
-          Outputs="@(YarnOutputs)">
+  <ItemGroup>
+    <InternalsVisibleTo Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication.Tests" />
+  </ItemGroup>
+
+  <Target Name="CompileInterop" Condition="'$(DesignTimeBuild)' != 'true'" Inputs="@(YarnInputs)" Outputs="@(YarnOutputs)">
     <Yarn Command="install --mutex network" WorkingDirectory="$(YarnWorkingDir)" />
     <Yarn Command="run build:release" WorkingDirectory="$(YarnWorkingDir)" Condition="'$(Configuration)' == 'Release'" />
     <Yarn Command="run build:debug" WorkingDirectory="$(YarnWorkingDir)" Condition="'$(Configuration)' == 'Debug'" />
