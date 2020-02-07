@@ -34,12 +34,12 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
         /// <summary>
         /// Gets or sets a <see cref="RenderFragment"/> with the UI to display while <see cref="RemoteAuthenticationActions.Register"/> is being handled.
         /// </summary>
-        [Parameter] public RenderFragment RegisterFragment { get; set; } = DefaultLoginFragment;
+        [Parameter] public RenderFragment RegisterFragment { get; set; }
 
         /// <summary>
         /// Gets or sets a <see cref="RenderFragment"/> with the UI to display while <see cref="RemoteAuthenticationActions.Profile"/> is being handled.
         /// </summary>
-        [Parameter] public RenderFragment ProfileFragment { get; set; } = DefaultLoginFragment;
+        [Parameter] public RenderFragment ProfileFragment { get; set; }
 
         /// <summary>
         /// Gets or sets a <see cref="RenderFragment"/> with the UI to display while <see cref="RemoteAuthenticationActions.LoginCallback"/> is being handled.

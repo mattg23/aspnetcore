@@ -20,6 +20,8 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
          where TRemoteAuthenticationState : RemoteAuthenticationState
          where TProviderOptions : new()
     {
+        private bool _initialized = false;
+
         /// <summary>
         /// The <see cref="IJSRuntime"/> to use for performing JavaScript interop operations.
         /// </summary>
@@ -76,7 +78,17 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
 
         /// <inheritdoc />
         public virtual async Task<RemoteAuthenticationResult<TRemoteAuthenticationState>> SignOutAsync(
-            RemoteAuthenticationContext<TRemoteAuthenticationState> context) => await _jsRuntime.InvokeAsync<RemoteAuthenticationResult<TRemoteAuthenticationState>>("AuthenticationService.signOut", context.State);
+            RemoteAuthenticationContext<TRemoteAuthenticationState> context)
+        {
+            await EnsureAuthService();
+            var result = await _jsRuntime.InvokeAsync<RemoteAuthenticationResult<TRemoteAuthenticationState>>("AuthenticationService.signOut", context.State);
+            if (result.Status == RemoteAuthenticationStatus.Success)
+            {
+                UpdateUser(GetCurrentUser());
+            }
+
+            return result;
+        }
 
         /// <inheritdoc />
         public virtual async Task<RemoteAuthenticationResult<TRemoteAuthenticationState>> CompleteSignOutAsync(
@@ -93,10 +105,18 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
         }
 
         /// <inheritdoc />
-        public virtual ValueTask<AccessTokenResult> GetAccessToken() => _jsRuntime.InvokeAsync<AccessTokenResult>("AuthenticationService.getAccessToken");
+        public virtual async ValueTask<AccessTokenResult> GetAccessToken()
+        {
+            await EnsureAuthService();
+            return await _jsRuntime.InvokeAsync<AccessTokenResult>("AuthenticationService.getAccessToken");
+        }
 
         /// <inheritdoc />
-        public virtual ValueTask<AccessTokenResult> GetAccessToken(AccessTokenRequestOptions options) => _jsRuntime.InvokeAsync<AccessTokenResult>("AuthenticationService.getAccessToken", options);
+        public virtual async ValueTask<AccessTokenResult> GetAccessToken(AccessTokenRequestOptions options)
+        {
+            await EnsureAuthService();
+            return await _jsRuntime.InvokeAsync<AccessTokenResult>("AuthenticationService.getAccessToken", options);
+        }
 
         /// <inheritdoc />
         public virtual async Task<ClaimsPrincipal> GetCurrentUser()
@@ -149,7 +169,14 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
             return principal;
         }
 
-        private async ValueTask EnsureAuthService() => await _jsRuntime.InvokeVoidAsync("AuthenticationService.init", _options.ProviderOptions);
+        private async ValueTask EnsureAuthService()
+        {
+            if (!_initialized)
+            {
+                await _jsRuntime.InvokeVoidAsync("AuthenticationService.init", _options.ProviderOptions);
+                _initialized = true;
+            }
+        }
 
         private void UpdateUser(Task<ClaimsPrincipal> task)
         {
