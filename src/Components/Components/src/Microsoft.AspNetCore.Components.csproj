@@ -57,4 +57,8 @@
     <NuspecProperty Include="OutputPath=$(OutputPath)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication.Tests" />
+  </ItemGroup>
+
 </Project>

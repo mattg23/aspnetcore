@@ -14,8 +14,8 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
         public void Configure(RemoteAuthenticationOptions<ApiAuthorizationProviderOptions> options)
         {
             options.ProviderOptions.ConfigurationEndpoint ??= $"_configuration/{_applicationName}";
-            options.AuthenticationPaths.RegisterPath ??= "Identity/Account/Register";
-            options.AuthenticationPaths.ProfilePath ??= "Identity/Account/Manage";
+            options.AuthenticationPaths.RemoteRegisterPath ??= "Identity/Account/Register";
+            options.AuthenticationPaths.RemoteProfilePath ??= "Identity/Account/Manage";
             options.UserOptions.ScopeClaim ??= "scope";
             options.UserOptions.RoleClaim ??= "scope";
             options.UserOptions.AuthenticationType??= _applicationName;

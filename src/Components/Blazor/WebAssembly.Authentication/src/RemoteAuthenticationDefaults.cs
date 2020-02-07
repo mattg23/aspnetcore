@@ -42,5 +42,15 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
         /// The default logout succeeded path.
         /// </summary>
         public const string LogoutSucceededPath = "authentication/logged-out";
+
+        /// <summary>
+        /// The default profile path.
+        /// </summary>
+        public const string ProfilePath = "authentication/profile";
+
+        /// <summary>
+        /// The default register path.
+        /// </summary>
+        public const string RegisterPath = "authentication/register";
     }
 }

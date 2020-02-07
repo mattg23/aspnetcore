@@ -9,14 +9,26 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
     public class RemoteAuthenticationApplicationPathsOptions
     {
         /// <summary>
-        /// Gets or sets the path to the endpoint for registering new users. It might be absolute and point outside of the application.
+        /// Gets or sets the path to the endpoint for registering new users.
         /// </summary>
-        public string RegisterPath { get; set; }
+        public string RegisterPath { get; set; } = RemoteAuthenticationDefaults.RegisterPath;
 
         /// <summary>
-        /// Gets or sets the path to the endpoint for registering new users. It might be absolute and point outside of the application.
+        /// Gets or sets the remote path to the remote endpoint for registering new users.
+        /// It might be absolute and point outside of the application.
         /// </summary>
-        public string ProfilePath { get; set; }
+        public string RemoteRegisterPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets the path to the endpoint for modifying the settings for the user profile.
+        /// </summary>
+        public string ProfilePath { get; set; } = RemoteAuthenticationDefaults.ProfilePath;
+
+        /// <summary>
+        /// Gets or sets the path to the remote endpoint for modifying the settings for the user profile.
+        /// It might be absolute and point outside of the application.
+        /// </summary>
+        public string RemoteProfilePath { get; set; }
 
         /// <summary>
         /// Gets or sets the path to the login page.

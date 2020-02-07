@@ -32,6 +32,16 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
         [Parameter] public RenderFragment LoginFragment { get; set; } = DefaultLoginFragment;
 
         /// <summary>
+        /// Gets or sets a <see cref="RenderFragment"/> with the UI to display while <see cref="RemoteAuthenticationActions.Register"/> is being handled.
+        /// </summary>
+        [Parameter] public RenderFragment RegisterFragment { get; set; } = DefaultLoginFragment;
+
+        /// <summary>
+        /// Gets or sets a <see cref="RenderFragment"/> with the UI to display while <see cref="RemoteAuthenticationActions.Profile"/> is being handled.
+        /// </summary>
+        [Parameter] public RenderFragment ProfileFragment { get; set; } = DefaultLoginFragment;
+
+        /// <summary>
         /// Gets or sets a <see cref="RenderFragment"/> with the UI to display while <see cref="RemoteAuthenticationActions.LoginCallback"/> is being handled.
         /// </summary>
         [Parameter] public RenderFragment LoginCallbackFragment { get; set; } = DefaultLoginCallbackFragment;
@@ -130,9 +140,26 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
                     _message = GetErrorMessage();
                     break;
                 case RemoteAuthenticationActions.Profile:
-                    await RedirectToProfile();
+                    if (ApplicationPaths.RemoteProfilePath == null)
+                    {
+                        ProfileFragment??= ProfileNotSupportedFragment;
+                    }
+                    else
+                    {
+                        ProfileFragment??= LoginFragment;
+                        await RedirectToProfile();
+                    }
                     break;
                 case RemoteAuthenticationActions.Register:
+                    if (ApplicationPaths.RemoteRegisterPath == null)
+                    {
+                        RegisterFragment ??= RegisterNotSupportedFragment;
+                    }
+                    else
+                    {
+                        RegisterFragment ??= LoginFragment;
+                    }
+
                     await RedirectToRegister();
                     break;
                 case RemoteAuthenticationActions.Logout:
@@ -166,7 +193,8 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
                     Navigation.NavigateTo(returnUrl);
                     break;
                 case RemoteAuthenticationStatus.Failure:
-                    Navigation.NavigateTo(Navigation.ToAbsoluteUri($"{ApplicationPaths.LoginFailedPath}?message={result.ErrorMessage}").PathAndQuery);
+                    var uri = Navigation.ToAbsoluteUri($"{ApplicationPaths.LoginFailedPath}?message={result.ErrorMessage}").ToString();
+                    Navigation.NavigateTo(uri);
                     break;
                 default:
                     break;
@@ -189,7 +217,8 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
                 case RemoteAuthenticationStatus.OperationCompleted:
                     break;
                 case RemoteAuthenticationStatus.Failure:
-                    Navigation.NavigateTo(Navigation.ToAbsoluteUri($"{ApplicationPaths.LoginFailedPath}?message={result.ErrorMessage}").PathAndQuery);
+                    var uri = Navigation.ToAbsoluteUri($"{ApplicationPaths.LoginFailedPath}?message={result.ErrorMessage}").ToString();
+                    Navigation.NavigateTo(uri);
                     break;
                 default:
                     throw new InvalidOperationException($"Invalid authentication result status '{result.Status}'.");
@@ -215,7 +244,8 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
                     case RemoteAuthenticationStatus.OperationCompleted:
                         break;
                     case RemoteAuthenticationStatus.Failure:
-                        Navigation.NavigateTo(Navigation.ToAbsoluteUri($"{ApplicationPaths.LogoutFailedPath}?message={result.ErrorMessage}").PathAndQuery);
+                        var uri = Navigation.ToAbsoluteUri($"{ApplicationPaths.LogoutFailedPath}?message={result.ErrorMessage}").ToString();
+                        Navigation.NavigateTo(uri);
                         break;
                     default:
                         throw new InvalidOperationException($"Invalid authentication result status '{result.Status ?? "(null)"}'.");
@@ -238,7 +268,8 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
                 case RemoteAuthenticationStatus.OperationCompleted:
                     break;
                 case RemoteAuthenticationStatus.Failure:
-                    Navigation.NavigateTo(Navigation.ToAbsoluteUri($"{ApplicationPaths.LogoutFailedPath}?message={result.ErrorMessage}").PathAndQuery);
+                    var uri = Navigation.ToAbsoluteUri($"{ApplicationPaths.LogoutFailedPath}?message={result.ErrorMessage}").ToString();
+                    Navigation.NavigateTo(uri);
                     break;
                 default:
                     throw new InvalidOperationException($"Invalid authentication result status '{result.Status ?? "(null)"}'.");
@@ -330,12 +361,12 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
         private ValueTask RedirectToRegister()
         {
             var loginUrl = Navigation.ToAbsoluteUri(ApplicationPaths.LoginPath).PathAndQuery;
-            var registerUrl = Navigation.ToAbsoluteUri($"{ApplicationPaths.RegisterPath}?returnUrl={loginUrl}").PathAndQuery;
+            var registerUrl = Navigation.ToAbsoluteUri($"{ApplicationPaths.RemoteRegisterPath}?returnUrl={loginUrl}").PathAndQuery;
 
             return JS.InvokeVoidAsync("location.replace", registerUrl);
         }
 
-        private ValueTask RedirectToProfile() => JS.InvokeVoidAsync("location.replace", Navigation.ToAbsoluteUri(ApplicationPaths.ProfilePath).PathAndQuery);
+        private ValueTask RedirectToProfile() => JS.InvokeVoidAsync("location.replace", Navigation.ToAbsoluteUri(ApplicationPaths.RemoteProfilePath).PathAndQuery);
 
         private string GetErrorMessage() => GetParameter("message");
 
@@ -343,6 +374,20 @@ namespace Microsoft.AspNetCore.Components.WebAssembly.Authentication
         {
             builder.OpenElement(0, "p");
             builder.AddContent(1, "Checking login state...");
+            builder.CloseElement();
+        }
+
+        private static void RegisterNotSupportedFragment(RenderTreeBuilder builder)
+        {
+            builder.OpenElement(0, "p");
+            builder.AddContent(1, "Registration is not supported.");
+            builder.CloseElement();
+        }
+
+        private static void ProfileNotSupportedFragment(RenderTreeBuilder builder)
+        {
+            builder.OpenElement(0, "p");
+            builder.AddContent(1, "Editing the profile is not supported.");
             builder.CloseElement();
         }
 
